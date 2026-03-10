@@ -9,24 +9,24 @@ app.use(express.json());
 const products= [
 
 {   id: 1,
-    name: "",
-    email: "",
+    name: "Juliana",
+    email: "Juli123@gmail.com",
 },
 {
     id: 2,
-    name: "",
-    email: "",
+    name: "María",
+    email: "Maria@gmail.com",
 },
 {
     id: 3,
-    name: "",
-    email: "",
+    name: "Ana",
+    email: "Ana@gmail.com",
 }
 ]
 
 // Ruta GET (Consultar)
-app.get('/', (req, res) => {
-  res.send('¡Hola Mundo! API bit-back funcionando.');
+app.get('/usuarios', (req, res) => {
+  res.status(200).json(products);
 });
 
 // Ruta POST (Crear)
@@ -36,8 +36,8 @@ app.post('/usuarios', (req, res) => {
     console.log(`Usuario recibido: Nombre - ${name}, Email - ${email}`);
     const NewProduct = {
         id: products.length + 1,
-        name,
-        email
+        name : name,
+        email : email,
     }
     products.push(NewProduct);
     res.status(201).json(NewProduct);
@@ -45,15 +45,35 @@ app.post('/usuarios', (req, res) => {
 //
 // Ruta PUT (Actualizar)
 app.put('/usuarios/:id', (req, res) => {
-  console.log(`Usuario ${req.params.id} actualizado (PUT)`);
-  res.status(200).json({ message: `Usuario ${req.params.id} actualizado (PUT)` });
-  
+    const { name, email } = req.body;
+    const index = products.findIndex(p => p.id === parseInt(req.params.id));
+    if (index !== -1) {
+        products[index] = { ...products[index], name, email };
+        res.status(200).json({ 
+            message: `Usuario ${req.params.id} actualizado`, 
+            usuario: products[index] 
+        });
+    } else {
+        res.status(404).json({ message: "Usuario no encontrado" });
+    }
 });
-//
+
 // Ruta DELETE (Eliminar)
+
 app.delete('/usuarios/:id', (req, res) => {
-    console.log(`Usuario ${req.params.id} eliminado (DELETE)`);
-    res.status(200).json({ message: `Usuario ${req.params.id} eliminado (DELETE)` });
+    const id = parseInt(req.params.id); 
+
+    const index = products.findIndex(p => p.id === id);
+
+    if (index === -1) {
+        return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+    const usuarioEliminado = products[index];
+    products.splice(index, 1);
+    res.status(200).json({
+        message: "Usuario eliminado con éxito",
+        usuario: usuarioEliminado
+    });
 });
 
 app.listen(port, () => {
